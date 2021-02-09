@@ -38,6 +38,12 @@ One important difference between `dplyr` with and without spatial data is that t
 * Confirm the geometry column has been dropped by re-running `head()`.
 
 ```{r drop, eval=FALSE}
+library(sf)
+library(dplyr)
+
+# Read in the trees shapefile
+trees <- st_read("data/trees.shp")
+
 # Create a data frame of counts by species
 species_counts <- count(trees, species, sort = T)
 
@@ -65,8 +71,11 @@ In this exercise you will test joining spatial and non-spatial data. In particul
 * Join the newly created `boro_distinct` data frame into the trees object with `inner_join()` from dplyr.
 * Use `head()` to confirm that the new fields (`county_fip` and `boro_code`) are included in the trees object.
 ```{r innerj, eval=FALSE}
+# Read in the neighborhood shapefile
+neighborhoods <- st_read("data/neighborhoods.shp")
+
 # Limit to the fields boro_name, county_fip and boro_code
-boro <- select(neighborhoods, boro_name, county_fip, boro_code)
+boro <- dplyr::select(neighborhoods, boro_name, county_fip, boro_code)
 
 # Drop the geometry column
 boro_no_geometry <- st_set_geometry(boro, NULL)
@@ -178,17 +187,17 @@ If you want to convert your `sf` point objects to a data frame with coordinates,
 trees <- read.csv("data/trees.csv")
 
 # Convert the data frame to an sf object
-trees_sf <- st_as_sf(trees, coords = ___, crs = ___)
+trees_sf <- st_as_sf(trees, coords = c("longitude", "latitude"), crs = 4326)
 
 # Plot the geometry of the points
 plot(st_geometry(trees_sf))
 
 # Write the file out with coordinates
-___(trees_sf, "new_trees.csv",  layer_options = ___, delete_dsn = TRUE)
+st_write(trees_sf, "new_trees.csv",  layer_options = "GEOMETRY=AS_XY", delete_dsn = TRUE)
 
 # Read in the file you just created and check coordinates
-new_trees <- ___("new_trees.csv")
-___(new_trees)
+new_trees <- read.csv("new_trees.csv")
+head(new_trees)
 ```
 
 Great, working with coordinates by turning them into `sf` objects or writing out to a data frame is a critical skill in spatial analysis. Note that `st_write()` can also be used to write lines and polygons but it wouldn't make sense to write these out with coordinates in the same format.

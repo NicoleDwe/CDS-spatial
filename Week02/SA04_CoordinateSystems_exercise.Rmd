@@ -39,6 +39,18 @@ When the geographic data you read in with `sf` already has a CRS defined both `s
 * Use the `crs()` function to define/assign a CRS to the `manhattan` object.
 
 ```{r crs, eval=FALSE}
+library(sf)
+library(raster)
+
+# Read in the neighborhood shapefile
+neighborhoods <- st_read("Week02/data/neighborhoods.shp")
+# Read in the trees shapefile
+trees <- st_read("Week02/data/trees.shp")
+
+# Read in the rasters
+canopy <- raster("Week02/data/canopy.tif")
+manhattan <- brick("Week02/data/manhattan.tif")
+
 # Determine the CRS for the neighborhoods and trees vector objects
 st_crs(neighborhoods)
 st_crs(trees)
