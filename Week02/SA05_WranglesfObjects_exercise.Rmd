@@ -181,7 +181,7 @@ trees <- read.csv("data/trees.csv")
 trees_sf <- st_as_sf(trees, coords = ___, crs = ___)
 
 # Plot the geometry of the points
-plot(___(trees_sf))
+plot(st_geometry(trees_sf))
 
 # Write the file out with coordinates
 ___(trees_sf, "new_trees.csv",  layer_options = ___, delete_dsn = TRUE)
