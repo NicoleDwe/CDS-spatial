@@ -31,26 +31,34 @@ In this exercise you will read in three shapefiles (one point file and two polyg
 
 ```{r load, eval=FALSE, echo=TRUE}
 # Load the sf package
-___(___)
+library(sf)
 
 # Read in the trees shapefile
-trees <- ___("data/trees.shp")
+trees <- st_read("data/trees.shp")
 
 # Read in the neighborhood shapefile
-neighborhoods <- ___(___)
+neighborhoods <- st_read("data/neighborhoods.shp")
 
 # Read in the parks shapefile
-parks <- ___(___)
+parks <- st_read("data/parks.shp")
 
 # View the first few trees
-___(___)
+head(trees)
+
+# Features in neighborhoods
+head(neighborhoods)
 ```
 
 ## Questions: 
 
 1. How many features do `trees` contain and what kind of geometry are they?
+They have 6 features and are points. 
+
 2. How many features are there inside `neighborhoods` and what is their geometry?
+They have 6 features and are (multi-)polygons.
+
 3. What is the CRS value in these objects?
+The CRS value for `trees` and `neighborhoods` is  WGS 84 (World Geodetic System 1984).
 
 Well done, you can see how easy it can be to read in shapefiles and you got your first taste of what an sf object looks like.
 
@@ -73,25 +81,31 @@ Multi-band rasters will have more than one layer. An example is a color aerial p
 
 ```{r loadraster, eval=FALSE, echo=TRUE}
 # Load the raster package
-___(___)
+library(raster)
+library(rgdal)
 
 # Read in the tree canopy single-band raster
-canopy <- ___(___)
+canopy <- raster("data/canopy.tif")
 
 # Read in the manhattan Landsat image multi-band raster
-manhattan <- ___(___)
+manhattan <- brick("data/manhattan.tif")
 
 # Get the class for the new objects
-class(___)
-class(___)
+class(canopy) #raster
+class(manhattan) #raster
 
 # Identify how many layers each object has
-nlayers(___)
-nlayers(___)
+nlayers(canopy) #1 
+nlayers(manhattan) #3
+
+# resolution manhattan
+res(manhattan)
 ```
 
 Questions:
 
 1. What are the dimensions (number of columns and rows) of the `canopy` raster?
-2. What is the resolution of `manhattan`?
+230 rows and 253 columns.
 
+2. What is the resolution of `manhattan`?
+The resolution of `manhattan` is 29.98979 30.00062. 
