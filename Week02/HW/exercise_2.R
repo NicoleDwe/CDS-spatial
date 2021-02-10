@@ -43,9 +43,9 @@ zion <- read_sf(system.file("vector/zion.gpkg", package = "spDataLarge"))
 
 # Additionally, the last exercise (IV) will used the masked version of the `lc_data` dataset.
 
-study_area <- read_sf("data/study_area.gpkg")
-lc_data <- raster("data/example_landscape.tif")
-lc_data_masked <- mask(crop(lc_data, study_area), study_area)
+# study_area <- read_sf("data/study_area.gpkg")
+# lc_data <- raster("data/example_landscape.tif")
+# lc_data_masked <- mask(crop(lc_data, study_area), study_area)
 
 #### Exercise I ####
 
@@ -67,7 +67,33 @@ lc_data_masked <- mask(crop(lc_data, study_area), study_area)
 
 # /Start Code/ #
 
+# 1. Displaying zion object and viewing its structure
 
+?zion
+# content: contains data of the zion national park
+
+class(zion)
+# type of data it stores: vector data
+
+head(zion)
+st_crs(zion)
+# coordinate system: the coordinate system is the UTM Zone 12 (Northern Hemisphere)
+# attributes: it has 11 attributes + the geographic/spatial information (= 12 columns)
+# dimensions: it has 2 dimensions (x, y)
+
+# 1. Displaying strm object and viewing its structure
+
+?srtm
+# content: elevation raster of zion nnational part 
+
+# this functions prints out all the "meta-data" together, rather than me having to call each of the functions
+# so I know there is other specific functions, but this is just easier
+ratify(srtm)
+# type of data: raster data
+# coordinate system: the corrdinate system is the WGS 84
+# attributes: I guess it contains one attribute of elevation (+ the spatial information)
+# dimensions: 457 rows, 465 cells
+# resolution: 0.0008333333, 0.0008333333 (x, y)
 
 # /End Code/ #
 
@@ -80,11 +106,33 @@ lc_data_masked <- mask(crop(lc_data, study_area), study_area)
 # Create a new object `zion2`
 # Vizualize the results using the `plot()` function.
 
-
 # Your solution
 
 # /Start Code/ #
 
+# 1: Reprojecting srtm to the crs of the zion
 
+# getting crs info of the zion object
+st_crs(zion)
+
+# because raster needs a proj4 string, I took the info from the st_crs and googled to find the proj4 string to do the transformation
+# here is the link: https://www.spatialreference.org/ref/epsg/wgs-84-utm-zone-12n/
+# defining utm12
+utm12 <- "+proj=utm +zone=12 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+
+# transform the srtm and save as srtm2
+srtm2 <- projectRaster(srtm, crs = utm12, method = "ngb")
+
+# plot srtm2
+plot(srtm2)
+
+# 2: Reprojecting zion to the crs of the srtm object
+
+# transform the zion dataset using the crs of the srtm
+zion2 <- st_transform(zion, crs = crs(srtm))
+
+# plot zion2
+plot(zion2)
+plot(st_geometry(zion2)) # for simple visualisation
 
 # /End Code/ #

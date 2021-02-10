@@ -74,6 +74,23 @@ tm_shape(nz_elev)  +
 
 # /Start Code/ #
 
+tm_shape(nz_elev)  +
+  tm_raster(title = "Elevation (m asl)", # 5: Improve legend title
+            style = "cont",
+            palette = "-RdYlGn") + # 3: Change palette
+  tm_shape(nz) +
+  tm_borders(col = "black", # 7: Change color of borders, and line width
+             lwd = 1.5) +
+  tm_scale_bar(breaks = c(0, 50, 100, 150, 200), # 6: Increase number of breaks
+               text.size = 1) +
+  tm_compass(position = c("right", "top"), # 4: North arrow in top right corner
+             type = "rose",  
+             size = 2) +
+  tm_credits(text = "N. Dwenger, 2021/02/09") + # 2: Update Map Credits
+  tm_layout(main.title = "New Zealand", # 1: Change Map Title
+            bg.color = "#d9d9d9", # 8: Change background color
+            inner.margins = c(0, 0, 0, 0))
+
 
 # /End Code/ #
 
@@ -89,5 +106,26 @@ zion = read_sf(system.file("vector/zion.gpkg", package = "spDataLarge"))
 
 # /Start Code/ #
 
+# finding out what the data sets are about
+?srtm
+?zion
+
+# checking their CRS
+crs(srtm)
+st_crs(zion)
+
+# making the map
+tm_shape(srtm) + # add elevation layer 
+  tm_raster(title = "Elevation (m asl)", # add title
+            style = "cont", # continuous coloring scale
+            palette = "-RdYlGn") +  # keep palette as above
+  tm_shape(zion) + # add park border layer 
+  tm_borders(col = "black") + # black borders
+  tm_compass(position = c("left", "bottom"), type = "rose", size = 2) + # add compass, change type and size
+  tm_scale_bar(position = c("left", "bottom")) + # add scale
+  tm_layout(main.title = "Zion National Park Area", # add main title
+            legend.position = c("right", "top"), # change position of legend
+            legend.bg.color = "white", # change background of legend
+            legend.bg.alpha = 0.8) # add some transparency to the legend
 
 # /End Code/ #

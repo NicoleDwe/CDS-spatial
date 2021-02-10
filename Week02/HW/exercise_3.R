@@ -36,20 +36,24 @@ library(spDataLarge)
 hist(nz$Population)
 
 # This line of code applies the 'pretty' style rounding legend numbers. Try different numbers of classes.
-tm_shape(nz) + tm_polygons(col = "Population", style = "pretty", n = 4)
+pretty <- tm_shape(nz) + tm_polygons(col = "Population", style = "pretty", n = 4) + 
+  tm_layout(main.title = "Pretty Style", main.title.size = 1, legend.text.size = 0.5, legend.position = c("left", "top"))
 
 # "Jenks" style further smooths over the gaps
-tm_shape(nz) + tm_polygons(col = "Population", style = "jenks", n = 5)
+jenks <- tm_shape(nz) + tm_polygons(col = "Population", style = "jenks", n = 5) + 
+  tm_layout(main.title = "Jenks Style", main.title.size = 1, legend.text.size = 0.5, legend.position = c("left", "top"))
 
 # quantile style divides into 5 even groups
-tm_shape(nz) + tm_polygons(col = "Population", style = "quantile", n=5)
+quantile <- tm_shape(nz) + tm_polygons(col = "Population", style = "quantile", n=5) + 
+  tm_layout(main.title = "Quantile Style", main.title.size = 1, legend.text.size = 0.5, legend.position = c("left", "top"))
 
 # Equal interval style divides the distribution into even groups
-tm_shape(nz) + tm_polygons(col = "Population", style = "equal", n = 5)
+equal <- tm_shape(nz) + tm_polygons(col = "Population", style = "equal", n = 5) + 
+  tm_layout(main.title = "Equal Style", main.title.size = 1, legend.text.size = 0.5, legend.position = c("left", "top"))
 
 # Write maps above to objects and plot them side by side 
 # with tmap_arrange() for better comparison
-tmap_arrange(___,___,___,____)
+tmap_arrange(pretty,jenks,quantile,equal)
 
 
 #### Exercise I ####
