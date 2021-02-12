@@ -71,5 +71,22 @@ tmap_arrange(pretty,jenks,quantile,equal)
 
 # /Start Code/ #
 
+# 1: Advantages and disadvantages of each classification method:
+# Pretty:
+  # Good: makes pretty breaks/classes, which might make it easier to understand/remember the classification
+  # Bad: how well it works might also depend on how many classes you set
+
+# Jenks 
+  # Good: nice, because you find a classification that works well with your data and therefore avoids disadvantages of e.g. the equal breaks
+  # Bad: the classification will be different for each dataset/map, which makes it difficult to compare maps
+
+# Quantile 
+  # Good: map will probably be pretty, because each color is represented euqally
+  # Bad: some classes might only contains a small range of values (0-3), while others have a large range of values (10-100), especially, if you have outliers. 
+      # In that case you would group together values which are very different, i.e. there would be little diversity in the colors in the map. 
+
+# Equal
+  # Good: easier to understand legend, and it's relation to the colors, works well when your data is spread across the entire range of values
+  # Bad: if your data is not spread across all values, if your data is skewed, or if your data has outliers, a lot of the map will be in the same/similar color
 
 # /End Code/ #
