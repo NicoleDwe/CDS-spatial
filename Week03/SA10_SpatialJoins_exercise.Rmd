@@ -133,7 +133,6 @@ neighborhoods_clip <- st_intersection(buf, neighborhoods_crs)
 # Plot the geometry of the clipped neighborhoods
 plot(st_geometry(neighborhoods_clip), col = "red")
 plot(neighborhoods_crs[cont,], add = TRUE, col = "yellow")
-
 ```
 
 
