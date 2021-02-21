@@ -289,13 +289,30 @@ sum(duplicated(unlist(intersections_in_buffers))) # 1394 duplicates
 st_crs(cities_sf3035)
 st_crs(insc_sf3035)
 
-# clip cities that are within the convex hull of inscriptions 
-# convex hull of inscriptions was already created above: insc_ch
-# clip cities 
+# clip cities that are within the convex hull of inscriptions, convex hull of inscriptions was already created above: insc_ch
 cities_ch <- st_intersection(insc_ch, cities_sf3035)
 
+# plot just for fun
 plot(cities_ch)
 plot(insc_sf3035, add = TRUE)
+
+# for each inscription calculate the distance to the nearest settlement
+# empty list for all the min distances
+# all_min_distances <- c()
+
+# for each city (which is within the convex hull):
+# for (point in 1:length(st_geometry(insc_sf3035))) {
+#   # get all the distances to each of the inscriptions
+#   distances <- st_distance(insc_sf3035[point], cities_ch)
+#   # get the minimum distance
+#   min_distance <- min(distances)
+#   # add the minimum distance to a list of all minimum distances
+#   all_min_distances <- c(distances, min_distance)
+# }
+# 
+# # calculate the mean distance across cities to the nearest inscription
+# mean(all_min_distances) 
+# # 516617.5 m = 516.62 km 
 
 ```
 

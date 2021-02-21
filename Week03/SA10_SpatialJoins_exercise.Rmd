@@ -172,12 +172,15 @@ d <- st_distance(empire_state, parks_es)
 
 # Take a quick look at the result
 head(d)
+View(d)
 
 # Find the index of the nearest park
 nearest <- which.min(d)
 
 # Identify the park that is nearest
 parks_es[nearest, ]$signname
+
+
 ```
 
 Nice work! If you look at the result for the last line of code carefully you'll see that the closest park is Greeley Square Park, it's just around the corner from the Empire State Building. In this case one of our feature sets was a single feature. You may end up applying this function in situations where there are multiple features in both objects. In this situation `sf` will return a matrix.
