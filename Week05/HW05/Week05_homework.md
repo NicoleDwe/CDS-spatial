@@ -15,8 +15,8 @@ read the information in the relevant section as a jumping-off point.
 Create a simple end to illustrate your results (if relevant). The two
 possibilities for analysis are:
 
-1.  evaluate the impact of anthropic factors on the burial mound health
-    , or
+1.  evaluate the impact of anthropic factors on the burial mound health,
+    or
 2.  analyze formally the location preferences of the ancient mound
     builders
 3.  practice unsupervised and supervised classification in R
@@ -322,13 +322,13 @@ are limited in their elevation, and are not insanely high.
 
 ## Slope Analysis
 
-In a first step, I analysed the slope For this, I first extracted the
-slope in degrees from the raster (aster) data. Then, I again used the
-coordinates of the mounds to get their slope values, and compared them
-to 733 randomly samples slopes from the raster data. Again, for both of
-these extracted datasets, I grouped values into bins (breaks), and
-calculated their frequency. Further, I plotted the distribution of
-elevation values beside each other to compare them.
+Second, I analysed the slope. For this, I extracted the slope in degrees
+from the raster (aster) data. Then, I again used the coordinates of the
+mounds to get their slope values, and compared them to 733 randomly
+samples slopes from the raster data. Again, for both of these extracted
+datasets, I grouped values into bins (breaks), and calculated their
+frequency. Further, I plotted the distribution of elevation values
+beside each other to compare them.
 
 ``` r
 # extract slope and aspect data from raster data
@@ -413,7 +413,7 @@ never really have slopes which are steeper than 20 degrees.
 
 ## Lake Proximity Analysis
 
-Lastly, I tried looking at how close mounds are located in relation to
+Lastly, I tried looking at how closely mounds are located in relation to
 lakes. For this, I did not use the other raster data that we could
 download, but used the vector data of lakes, to calculate the minimum
 distance between each mound and the lakes. Then, I samples 773

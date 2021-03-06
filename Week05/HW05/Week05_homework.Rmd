@@ -180,7 +180,7 @@ hist(random_elevations, breaks = elevation_breaks,
 
 ## Slope Analysis
 
-In a first step, I analysed the slope For this, I first extracted the slope in degrees from the raster (aster) data. Then, I again used the coordinates of the mounds to get their slope values, and compared them to 733 randomly samples slopes from the raster data. Again, for both of these extracted datasets, I grouped values into bins (breaks), and calculated their frequency. Further, I plotted the distribution of elevation values beside each other to compare them. 
+Second, I analysed the slope. For this, I extracted the slope in degrees from the raster (aster) data. Then, I again used the coordinates of the mounds to get their slope values, and compared them to 733 randomly samples slopes from the raster data. Again, for both of these extracted datasets, I grouped values into bins (breaks), and calculated their frequency. Further, I plotted the distribution of elevation values beside each other to compare them. 
 
 ```{r results = 'hide'}
 # extract slope and aspect data from raster data
@@ -226,7 +226,7 @@ hist(random_slopes, breaks = slope_breaks,
 
 ## Lake Proximity Analysis
 
-Lastly, I tried looking at how close mounds are located in relation to lakes. For this, I did not use the other raster data that we could download, but used the vector data of lakes, to calculate the minimum distance between each mound and the lakes. Then, I samples 773 coordinates randomly within the region of interest, and again calculated their minimum distance to a lake. For both, frequency values within bins are calculated and visualised in histograms. 
+Lastly, I tried looking at how closely mounds are located in relation to lakes. For this, I did not use the other raster data that we could download, but used the vector data of lakes, to calculate the minimum distance between each mound and the lakes. Then, I samples 773 coordinates randomly within the region of interest, and again calculated their minimum distance to a lake. For both, frequency values within bins are calculated and visualised in histograms. 
 
 ```{r}
 lake_breaks <- c(0,500,1000,1500,2000,2500,3000,3500,4000,4500,5000,5500,6000,6500,7000,7500)
