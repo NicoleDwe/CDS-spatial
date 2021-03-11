@@ -56,7 +56,7 @@ bw_choice <- spseg(
     opt = 1)
 
 # plot the results and highlight the best bandwidth
-plotcv(bw_choice); abline(v = bw_choice$hcv, lty = 2, col = "red")
+plotcv(bw_choice, xlab = "Bandwidth", ylab = "CV Test Statistic"); abline(v = bw_choice$hcv, lty = 2, col = "red")
 
 # print the best bandwidth
 print(bw_choice$hcv)

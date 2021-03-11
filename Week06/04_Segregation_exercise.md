@@ -70,7 +70,7 @@ bw_choice <- spseg(
 
 ``` r
 # plot the results and highlight the best bandwidth
-plotcv(bw_choice); abline(v = bw_choice$hcv, lty = 2, col = "red")
+plotcv(bw_choice, xlab = "Bandwidth", ylab = "CV Test Statistic"); abline(v = bw_choice$hcv, lty = 2, col = "red")
 ```
 
 ![](04_Segregation_exercise_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
