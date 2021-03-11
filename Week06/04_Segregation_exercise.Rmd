@@ -1,12 +1,13 @@
 ---
 title: "Spatial Segregation: Preston Crime continued"
-author: "Adela Sobotkova"
-date: "11/12/2020 updated `r format(Sys.time(), '%B %d, %Y')`"
-output: 
+author: "Nicole Dwenger"
+date: "Updated `r format(Sys.time(), '%B %d, %Y')`"
+output:
   html_document:
     toc: true
     toc_float: true
     highlight: tango
+#output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -31,28 +32,33 @@ The first step is to compute the optimal bandwidth for kernel smoothing under th
  - Call `plotcv()` on `bw_choice`.
  - Highlight the best bandwidth by adding a vertical line where the test statistic is maximized. 
 
-```{r bandwidth-exercise, eval = FALSE}
+```{r bandwidth-exercise, message=FALSE}
 # Install spatialkernel (the CRAN version is outdated, so you need to grab the most recent maintained version from Github). You may need to install.packages("devtools") and then run:
-
+#install.packages("devtools")
+#library(devtools)
 devtools::install_github("becarioprecario/spatialkernel")
 
-# Libraries
+# libraries
 library(spatstat)
 library(spatialkernel)
+library(raster)
 
-# Data
+# data
 preston_crime <- readRDS("data/pcrime-spatstat.rds")
 
-# Scan from 500m to 1000m in steps of 50m
+```
+
+```{r, message = FALSE, }
+# scan from 500m to 1000m in steps of 50m
 bw_choice <- spseg(
     preston_crime, 
     h = seq(500, 1000, by = 50),
     opt = 1)
 
-# Plot the results and highlight the best bandwidth
+# plot the results and highlight the best bandwidth
 plotcv(bw_choice); abline(v = bw_choice$hcv, lty = 2, col = "red")
 
-# Print the best bandwidth
+# print the best bandwidth
 print(bw_choice$hcv)
 ```
 
@@ -72,20 +78,20 @@ Normally you would run this process for at least 100 simulations, but that will 
  - Run the function for 10 simulations only via the `ntest` parameter.
  - The output consists of probability maps for each class in the marks of the data. Plot the map for the violent crimes. Add "Violent crime" as the title to your plots. 
 
-```{r optimum-bandwith, eval=FALSE}
-# Set the correct bandwidth and run for 10 simulations only
+```{r optimum-bandwith}
+# set the correct bandwidth and run for 10 simulations only
 seg10 <- spseg(
     pts = preston_crime, 
     h = bw_choice$hcv,
     opt = 3,
     ntest = 10, 
     proc = FALSE)
-# Plot the segregation map for violent crime
+# plot the segregation map for violent crime
 plotmc(seg10, "Violent crime")
 
-# You can modify the script above to run 1000 simulations if you have 20 mins of time. Alternatively, load the 'seg' object from data/.
+# you can modify the script above to run 1000 simulations if you have 20 mins of time. Alternatively, load the 'seg' object from data/.
 seg <- readRDS("data/seg.rds")
-# Plot seg, the result of running 1000 simulations
+# plot seg, the result of running 1000 simulations
 plotmc(seg, "Violent crime")
 
 ```
@@ -114,35 +120,35 @@ The `seg` object from 1000 simulations can be loaded from data folder, as well a
 * Create `p_value` as in the previous step, except that the `z` element is logical, and `TRUE` when the `stpvalue` element of seg is less than 0.05.
 * Call the `segmap()` function shown in the script to find areas where the probability of a crime being violent is above 0.15. Use 0.05 as the lower probability.
 
-```{r segregation, eval=FALSE}
-# Inspect the structure of the spatial segregation object
+```{r segregation}
+# inspect the structure of the spatial segregation object
 str(seg)
 
-# Get the number of columns in the data so we can rearrange to a grid
+# get the number of columns in the data so we can rearrange to a grid
 ncol <- length(seg$gridx)
 
-# Rearrange the probability column into a grid
+# rearrange the probability column into a grid
 prob_violent <- list(x = seg$gridx,
                      y = seg$gridy,
                      z = matrix(seg$p[, "Violent crime"],
                                 ncol = ncol))
 
-# You have basically georeferenced the image within data's coordinates
-image(prob_violent, asp = 1)
+# you have basically georeferenced the image within data's coordinates
+image(prob_violent, asp = 1, main = "Probability Distribution of Violent crime in Preston (UK)")
 
-# Rearrange the p-values, but choose a p-value threshold
+# rearrange the p-values, but choose a p-value threshold
 p_value <- list(x = seg$gridx,
                 y = seg$gridy,
                 z = matrix(seg$p[, "Violent crime"]< 0.05,
                                 ncol = ncol))
-image(p_value, asp = 1)
+
+image(p_value, asp = 1, main = "Probability of Violent Crime < 0.05 in Preston (UK)")
 
 
-# Create a mapping function
+# create a mapping function
 segmap <- function(prob_list, pv_list, low, high){
 
   # background map
-  library(raster)
   preston_osm <- readRDS("data/osm_preston_gray.rds")
   plotRGB(preston_osm)
 
