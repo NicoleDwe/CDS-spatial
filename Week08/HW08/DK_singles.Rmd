@@ -1,0 +1,207 @@
+---
+title: "Female Singles in DK"
+author: "Nicole Dwenger"
+date: "3/25/2021"
+output: html_document
+#editor_options: 
+#  chunk_output_type: console
+---
+
+## Task: Autocorrelation of Distribution of single women in Denmark during 2020
+
+Test for the autocorrelation of the distribution of single women OR single men in Denmark during 2020, and answer the question: "Is the population of single women/men in Denmark spatially correlated? What is the correlation and how significant is the trend?. You can download the attribute data either from Denmark Statistic, or find a slightly tidied dataset at this [URL](https://docs.google.com/spreadsheets/d/1xcrd07gV3Sm0fuzSIWu2Op36oDBmvvrlHU9uNz49kuU/edit#gid=0).
+
+### Getting libraries
+```{r libraries, message = FALSE}
+# libraries
+library(raster)
+library(rgeos)
+library(sf)
+library(tidyverse)
+library(htmltools)
+library(googlesheets4)
+library(cartogram)
+library(mapview)
+library(tmap)
+library(spdep)
+library(here)
+library(knitr)
+library(rmdformats)
+```
+
+### Getting and cleaning spatial data
+```{r spatial data , message = FALSE}
+# loading data and turning into sf
+mun_sp <- readRDS(here("Week08", "data", "gadm36_DNK_2_sp.rds"))
+mun_sf <- st_as_sf(mun_sp)
+mun <- st_transform(mun_sf, crs = 32632)
+# quick view
+#mapview::mapview(mun)
+
+# fixing names
+mun$NAME_2[31] <- "Aarhus"
+mun$NAME_2[21] <- "Høje-Taastrup"
+mun$NAME_2[60] <- "Vesthimmerlands"
+```
+
+### Getting and cleaning relationship data
+```{r singles data, message = FALSE}
+# loading the data
+#relationships <- read_sheet("https://docs.google.com/spreadsheets/d/1xcrd07gV3Sm0fuzSIWu2Op36oDBmvvrlHU9uNz49kuU/edit#gid=0")
+#write_csv(relationships, "Week08/HW08/relationships.csv")
+relationships <- read_csv(here("Week08", "HW08", "relationships.csv")) %>% na.omit()
+
+# 104 regions
+colnames(relationships)
+relationships %>% group_by(Sex,Status) %>%
+  summarise(n = n())
+
+# 99 regions in mun, 104 regions in relationship data, so I'm removing them
+out_regions <- setdiff(relationships$Region, mun$NAME_2)
+relationships <- relationships %>% filter(!Region %in% out_regions)
+length(unique(relationships$Region)) # now 99
+```
+
+### Preprocessing female data of 2020
+```{r female percentages, message = FALSE}
+# filtering on females in 2020
+f_2020 <- relationships %>% 
+  # filter on only women
+  filter(Sex == "Kvinder") %>% 
+  # create new column with TRUE/FALSE for single/not single
+  mutate(Single = ifelse(Status == "Gift/separeret", FALSE, TRUE)) %>%
+  # group by region and single column
+  group_by(Region, Single) %>%
+  # calculate sums, i.e. how many are single, how many are not single 
+  summarize(N2020 = sum(Y2020K1))
+
+# calculate "population", i.e. the sum of all women for each region
+f_totals <- f_2020 %>%
+  # grouping by region
+  group_by(Region) %>%
+  # calculating the sum of numbers, i.e. total population
+  summarize(sum2020 = sum(N2020))
+
+# calculate the percentages of someone being single or not 
+f_percentages <- f_2020 %>%
+  # adding the totals 
+  merge(f_totals, by = "Region") %>%
+  # adding column for percentages of singles/not singles
+  mutate(pct_2020 = N2020/sum2020*100)
+  
+# merging the spatial data
+f_data <- mun %>%
+  merge(f_percentages, by.x = "NAME_2", by.y="Region")
+
+```
+
+### Mapping
+```{r mapping}
+
+# getting only singles data
+f_singles <- f_data %>% filter(Single==TRUE)
+
+# quick map of % of female singles in 2020 in Denmark
+f_singles %>%
+  group_by(NAME_2) %>%
+  select(pct_2020) %>%
+  mapview(layer.name = "% of Single Females")
+```
+
+### Catogram
+```{r, message = FALSE}
+# scatter plot of area and total population 
+plot(f_singles$sum2020, st_area(f_singles, byid = TRUE))
+# scatter plot of area and percentage of singles
+plot(f_singles$pct_2020, st_area(f_singles, byid = TRUE))
+
+# cartogram, scaling area to total population
+cartogram_sum2020 <- cartogram_cont(f_singles, "sum2020")
+
+# check linearity
+plot(cartogram_sum2020$sum2020, st_area(cartogram_sum2020, byid = TRUE))
+
+# cartogram, scaling area to percentage of singles
+cartogram_singles2020 <- cartogram_cont(f_singles, "pct_2020")
+
+# Check the linearity of the DF voter percentage per municipality plot
+plot(cartogram_singles2020$pct_2020, st_area(cartogram_singles2020, byid = TRUE))
+
+# fairer map of female single percentage in 2020
+plot(cartogram_singles2020$geometry, 
+     col = "beige",
+     main = "% of Single Females in DK")
+```
+
+### Autocorrelation Test
+#### Based on queen adjacency
+```{r}
+# simplifying geometry of municipalities
+mun_sm <- st_cast(st_simplify(mun, dTolerance = 250), to = "MULTIPOLYGON")
+plot(mun_sm$geometry)
+# getting neighbors based on queen adjacency
+nb_queen <- poly2nb(mun_sm$geometry)
+nb_queen
+# getting centers of the municipalities
+mun_centers <-st_centroid(mun_sm$geometry, of_largest_polygon = TRUE)
+# plotting connections
+plot(mun_sm$geometry); plot(nb_queen, mun_centers, col = "red",add = TRUE)
+
+# morans test: not significant
+moran.test(f_singles$pct_2020, nb2listw(nb_queen, style = "W",zero.policy=TRUE),zero.policy=TRUE)
+# monte carlo simulation: not significant 
+MC_queen = moran.mc(f_singles$pct_2020,nb2listw(nb_queen, zero.policy=TRUE),zero.policy=TRUE, nsim = 999)
+MC_queen
+# plot MC simulations
+plot(MC_queen, main="Distribution of MC simulation based on queen neighbours", las=1)
+```
+
+#### Based on 100km distance 
+```{r}
+# make neighbor list from neighbours at 100km distance
+nb_100 <- dnearneigh(mun_centers, 0, 100000)
+plot(mun_sm$geometry); plot(nb_100, mun_centers, col = "red",add = TRUE);title(main="Neighbours with 100km distance")
+
+# morans test (using "less" because the value is negative): not significant 
+moran.test(f_singles$pct_2020, nb2listw(nb_100, style = "W",zero.policy=TRUE),zero.policy=TRUE, alternative="less")
+# monte carlo simulation: not significant 
+MC_100 = moran.mc(f_singles$pct_2020,nb2listw(nb_100, zero.policy=TRUE),zero.policy=TRUE, nsim = 999, alternative="less")
+MC_100
+# plot MC simulations
+plot(MC_100, main="Distribution of MC simulation based on 100km distance neighbours", las=1)
+```
+
+#### Based on 50km distance
+```{r}
+# make neighbor list from neighbours at 50km distance
+nb_50 <- dnearneigh(mun_centers, 0, 50000)
+plot(mun_sm$geometry); plot(nb_50, mun_centers, col = "blue",add = TRUE);title(main="Neighbours within 50km distance")
+
+# morans test: not significant
+moran.test(f_singles$pct_2020, nb2listw(nb_50, style = "W",zero.policy=TRUE),zero.policy=TRUE, alternative ="less")
+# monte carlo simulation: not significant 
+MC_50 = moran.mc(f_singles$pct_2020,nb2listw(nb_50, zero.policy=TRUE),zero.policy=TRUE, nsim = 999, alternative="less")
+MC_50
+# plot MC simulations
+plot(MC_50, main="Distribution of MC simulation based on 50km distance neighbours", las=1)
+```
+
+#### Based on k-neighbours
+```{r}
+# getting the three neirest neighbours
+mat <- as.matrix(st_coordinates(mun_centers))
+k3 <- knearneigh(mat, k=3, longlat=FALSE)
+nb_k3 <- knn2nb(k3)
+plot(nb_k3, mun_sm$geometry)
+
+# morans test: not significant
+moran.test(f_singles$pct_2020, nb2listw(knn2nb(k3), style = "W",zero.policy=TRUE),zero.policy=TRUE)
+# monte carlo simulation: not significant
+MC_k3 <- moran.mc(f_singles$pct_2020,nb2listw(knn2nb(k3), zero.policy=TRUE),zero.policy=TRUE, nsim = 999)
+MC_k3
+# plot MC simulations
+plot(MC_k3, main="Distribution of MC simulation based on k=3 neighbours", las=1)
+```
+
+### Conclusion
+Testing spatial correlation with different based on different neighborhoods did not reveal any spatial clustering. For some tests Moran's I was negative, while it was positive for others. However, overall none of the values were significant (all > .05), suggesting that the spatial clustering was not significantly different from a random clustering. 
